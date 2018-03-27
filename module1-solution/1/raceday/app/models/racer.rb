@@ -1,10 +1,22 @@
 class Racer
   include Mongoid::Document
 
+  attr_accessor :id, :number, :first_name, :last_name, :gender, :group, :secs
+
   @@db = nil
 
+  def initialize(params={})
+    @id = params[:_id].nil? ? params[:id] : params[:_id].to_s
+    @number = params[:number].to_i
+    @first_name = params[:first_name]
+    @last_name = params[:last_name]
+    @gender = params[:gender]
+    @group = params[:group]
+    @secs = params[:secs].to_i
+  end
+
   def self.all(prototype = {}, sort = {:number => 1}, skip = 0, limit = nil)
-    result = self.collection.find(prototype).sort(sort).skip(skip)
+    result = collection.find(prototype).sort(sort).skip(skip)
     result = result.limit(limit) unless limit.nil?
     return result
   end
@@ -17,8 +29,25 @@ class Racer
 
   # a class method that returns the racers MongoDB Collection object
   def self.collection
-    self.mongo_client unless @@db
+    mongo_client unless @@db
     @@db[:racers]
+  end
+
+  def self.find id
+    result = collection.find(_id: BSON::ObjectId.from_string(id)).first
+    return result.nil? ? nil : Racer.new(result)
+  end
+
+  def save
+    result = self.class.collection.insert_one(
+      number: self.number,
+      first_name: first_name,
+      last_name: last_name,
+      gender: gender,
+      group: group,
+      secs: secs
+    )
+    @id = result.inserted_id.to_s
   end
 
 end
