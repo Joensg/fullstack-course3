@@ -1,5 +1,6 @@
 class Racer
   # include Mongoid::Document
+  include ActiveModel::Model
 
   attr_accessor :id, :number, :first_name, :last_name, :gender, :group, :secs
 
@@ -73,6 +74,18 @@ class Racer
   def destroy
     racer = self.class.collection.find(number: @number)
     racer.delete_one
+  end
+
+  def persisted?
+    !@id.nil?
+  end
+
+  def created_at
+    nil
+  end
+
+  def updated_at
+    nil
   end
 
 end
