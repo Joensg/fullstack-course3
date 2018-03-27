@@ -1,5 +1,5 @@
 class Racer
-  include Mongoid::Document
+  # include Mongoid::Document
 
   attr_accessor :id, :number, :first_name, :last_name, :gender, :group, :secs
 
@@ -48,6 +48,31 @@ class Racer
       secs: secs
     )
     @id = result.inserted_id.to_s
+  end
+
+  def update(params)
+    @number = params[:number].to_i
+    @first_name = params[:first_name]
+    @last_name = params[:last_name]
+    @gender = params[:gender]
+    @group = params[:group]
+    @secs = params[:secs].to_i
+
+    racer = self.class.collection.find(_id: BSON::ObjectId.from_string(@id)).first
+
+    self.class.collection.find(_id: racer[:_id]).replace_one(
+      number: self.number,
+      first_name: first_name,
+      last_name: last_name,
+      gender: gender,
+      group: group,
+      secs: secs
+    )
+  end
+
+  def destroy
+    racer = self.class.collection.find(number: @number)
+    racer.delete_one
   end
 
 end
